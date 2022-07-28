@@ -1,0 +1,174 @@
+{% extends 'base/main.html' %}
+{% load static %}
+
+{% block extend_head %}
+
+{% endblock %}
+
+{% block content %}
+
+    <h3 style ="color:black;text-align:center;">Acceleration at point A</h3>
+
+    <br>
+
+    <div style="max-width: 900px; max-height: 400px; text-align:center;">
+        <canvas id="myChart" width="900" height="400"></canvas>
+    </div>
+    
+    <br>
+
+    <h3 style ="color:black;text-align:center;">Acceleration at point B</h3>
+
+    <br>
+
+    <div style="max-width: 900px; max-height: 400px; text-align:center;">
+        <canvas id="GChart" width="900" height="400"></canvas>
+    </div>
+
+{% endblock content %}
+
+
+{% block extend_footer %}
+<!-- Custom JavaScripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.8.2/chart.js"></script>
+
+<script>
+    socket = new WebSocket('ws://localhost:8000/ws/polData/');
+
+    var websocketList = [];
+
+    socket.onopen= function(e){
+    alert('connection established');
+    };
+
+    socket.onmessage = function(e){
+    console.log(e.data);
+    var recData=JSON.parse(e.data);
+
+// ---------------------------------------
+    dataObjNew1=dataObj['data']['datasets'][0]['data'];
+    dataObjNew1.shift();
+    dataObjNew1.push(recData.value["x"]);
+    dataObj['data']['datasets'][0]['data']=dataObjNew1;
+
+    dataObjNew2=dataObj['data']['datasets'][1]['data'];
+    dataObjNew2.shift();
+    dataObjNew2.push(recData.value["y"]);
+    dataObj['data']['datasets'][1]['data']=dataObjNew2;
+
+    dataObjNew3=dataObj['data']['datasets'][2]['data'];
+    dataObjNew3.shift();
+    dataObjNew3.push(recData.value["z"]);
+    dataObj['data']['datasets'][2]['data']=dataObjNew3;
+
+// --------------------------
+
+
+    dataObjNew4=dataObjB['data']['datasets'][0]['data'];
+    dataObjNew4.shift();
+    dataObjNew4.push(recData.value["xx"]);
+    dataObjB['data']['datasets'][0]['data']=dataObjNew4;
+
+    dataObjNew5=dataObjB['data']['datasets'][1]['data'];
+    dataObjNew5.shift();
+    dataObjNew5.push(recData.value["yy"]);
+    dataObjB['data']['datasets'][1]['data']=dataObjNew5;
+
+    dataObjNew6=dataObjB['data']['datasets'][2]['data'];
+    dataObjNew6.shift();
+    dataObjNew6.push(recData.value["zz"]);
+    dataObjB['data']['datasets'][2]['data']=dataObjNew6;
+
+//---------------------------
+    window.myLine.update();
+
+    };
+
+
+    socket.onclose = function(e){
+    alert('connection closed');
+    };
+</script>
+
+<script>
+var xValues = [100,200,300,400,500,600,700,800,900,1000];
+
+var dataObj={
+    type: "line",
+    data: {
+        labels: xValues,
+        datasets: [{ 
+        label: 'x-axis',
+        data: [860,1140,1060,1060,1070,1110,1330,2210,7830,2478],
+        borderColor: "red",
+        fill: false
+        }, { 
+        label: 'y-axis',
+        data: [1600,1700,1700,1900,2000,2700,4000,5000,6000,7000],
+        borderColor: "green",
+        fill: false
+        
+        }, { 
+        label: 'z-axis',
+        data: [300,700,2000,5000,6000,4000,2000,1000,200,100],
+        borderColor: "blue",
+        fill: false
+        }]
+    },
+    options: {
+        title:{
+            display: true,
+            text: "x-axis, y-axis, z-axis  (rgb)"
+        },
+
+        legend: {display: false},
+
+    }
+}
+
+    var ctx = document.getElementById('myChart').getContext('2d');
+    window.myLine = new Chart(ctx,dataObj );
+</script>
+
+<script>
+    var xValues = [100,200,300,400,500,600,700,800,900,1000];
+    
+    var dataObjB={
+        type: "line",
+        data: {
+            labels: xValues,
+            datasets: [{ 
+            label: 'x-axis',
+            data: [860,1140,1060,1060,1070,1110,1330,2210,7830,2478],
+            borderColor: "red",
+            fill: false
+            }, { 
+            label: 'y-axis',
+            data: [1600,1700,1700,1900,2000,2700,4000,5000,6000,7000],
+            borderColor: "green",
+            fill: false
+            
+            }, { 
+            label: 'z-axis',
+            data: [300,700,2000,5000,6000,4000,2000,1000,200,100],
+            borderColor: "blue",
+            fill: false
+            }]
+        },
+        options: {
+            title:{
+                display: true,
+                text: "x-axis, y-axis, z-axis  (rgb)"
+            },
+    
+            legend: {display: false},
+    
+        }
+    }
+    
+        var Gtx = document.getElementById('GChart').getContext('2d');
+        window.myLine = new Chart(Gtx,dataObjB);
+    </script>
+{% endblock %}
